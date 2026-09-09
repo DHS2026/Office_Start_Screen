@@ -18,38 +18,40 @@
             overflow: hidden;
         }
 
-        /* ব্যাকগ্রাউন্ড ইমেজ এবং ওভারলে */
         .splash-container {
             position: relative;
             width: 100%;
             height: 100vh;
-            background: url('https://lh3.googleusercontent.com/d/1D14yBJkfI1cTPJ0hpfcYH9qKB16wMo4N') no-repeat center center fixed; /* বিকল্প হিসেবে স্কুলের ছবিও দিতে পারেন */
+            background: url('https://lh3.googleusercontent.com/d/1D14yBJkfI1cTPJ0hpfcYH9qKB16wMo4N') no-repeat center center fixed;
             background-size: cover;
             display: flex;
             justify-content: center;
             align-items: center;
         }
 
-        /* ব্যাকগ্রাউন্ড ডার্ক ওভারলে যাতে লেখা ও লোগো স্পষ্টো দেখা যায় */
         .overlay {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(11, 27, 43, 0.85);
+            background: rgba(11, 27, 43, 0.88);
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             padding: 20px;
             text-align: center;
+            box-sizing: border-box;
         }
 
-        /* স্কুল লোগো অ্যানিমেশন */
         .school-logo {
-            width: 110px;
-            height: 110px;
+            width: 25vw;
+            max-width: 100px;
+            min-width: 75px;
+            height: 25vw;
+            max-height: 100px;
+            min-height: 75px;
             border-radius: 50%;
             border: 3px solid #00f0ff;
             box-shadow: 0 0 20px rgba(0, 240, 255, 0.6);
@@ -67,21 +69,30 @@
 
         h1 {
             color: #ffffff;
-            font-size: 22px;
+            font-size: clamp(18px, 4vw, 24px);
             font-weight: bold;
             letter-spacing: 1px;
             margin-bottom: 5px;
             text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            width: 100%;
         }
 
         h3 {
             color: #ffcc00;
-            font-size: 14px;
-            margin-bottom: 30px;
+            font-size: clamp(13px, 3vw, 15px);
+            margin-bottom: 25px;
             text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            width: 100%;
         }
 
-        /* এসপি দিন স্পিনার (Loading Spinner) */
+        #loaderBox {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+        }
+
         .spinner {
             width: 45px;
             height: 45px;
@@ -89,7 +100,7 @@
             border-top: 4px solid #00f0ff;
             border-radius: 50%;
             animation: spin 1s linear infinite;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
         }
 
         @keyframes spin {
@@ -102,9 +113,10 @@
             font-size: 14px;
             font-weight: 600;
             letter-spacing: 0.5px;
+            text-align: center;
+            width: 100%;
         }
 
-        /* যদি লোড হতে দেরি হয় তবে রিলোড বাটন */
         .retry-btn {
             display: none;
             margin-top: 20px;
@@ -127,21 +139,18 @@
 </head>
 <body>
 
-    <div class="splash-container" style="background-image: url('https://lh3.googleusercontent.com/d/1D14yBJkfI1cTPJ0hpfcYH9qKB16wMo4N');">
+    <div class="splash-container">
         <div class="overlay">
-            <!-- স্কুল লোগো -->
             <img src="https://lh3.googleusercontent.com/d/1D14yBJkfI1cTPJ0hpfcYH9qKB16wMo4N" alt="School Logo" class="school-logo">
             
             <h1>DHAINAGAR HIGH SCHOOL (H.S.)</h1>
             <h3>Salary Update System</h3>
 
-            <!-- লোডার স্পিনার -->
             <div id="loaderBox">
                 <div class="spinner"></div>
                 <div class="loading-text" id="statusText">Connecting to Portal...</div>
             </div>
 
-            <!-- ফলব্যাক রিলোড বাটন -->
             <button class="retry-btn" id="retryBtn" onclick="checkAndRedirect()">Reload Page</button>
         </div>
     </div>
@@ -158,11 +167,8 @@
             retryBtn.style.display = "none";
             spinner.style.display = "block";
 
-            // ফেচ রিকোয়েস্টের মাধ্যমে চেক করা লিংকটি রেসপন্স দিচ্ছে কি না
-            // নোটেহ: Google Apps Script CORS প্রটেকশনের কারণে 'no-cors' মোড ব্যবহার করা হয়েছে
             fetch(targetUrl, { mode: 'no-cors' })
                 .then(() => {
-                    // সফলভাবে লিংক ট্রিগার হলে রিডাইরেক্ট করবে
                     window.location.replace(targetUrl);
                 })
                 .catch((error) => {
@@ -170,22 +176,18 @@
                     fallbackRedirect();
                 });
 
-            // অতিরিক্ত নিরাপত্তা হিসেবে ৫ সেকেন্ডের টাইমার সেট করা হলো
             setTimeout(() => {
                 window.location.replace(targetUrl);
             }, 4000);
         }
 
         function fallbackRedirect() {
-            // যদি ফেচ করতে সমস্যা হয় তবুও সরাসরি রিডাইরেক্ট করার চেষ্টা করবে
             window.location.href = targetUrl;
         }
 
-        // পেজ লোড হওয়ার সাথে সাথেই ফাংশন কল হবে
         window.onload = function() {
             setTimeout(checkAndRedirect, 1000);
 
-            // যদি ৭ সেকেন্ডের বেশি সময় ধরে লোড না হয়, তবে ইউজারের সুবিধার জন্য রিলোড বাটন অন করে দেবে
             setTimeout(() => {
                 const retryBtn = document.getElementById("retryBtn");
                 const spinner = document.querySelector(".spinner");
