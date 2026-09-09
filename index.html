@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dhainagar High School (H.S.) - Loading</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        /* ব্যাকগ্রাউন্ড ইমেজ এবং ওভারলে */
+        .splash-container {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            background: url('https://lh3.googleusercontent.com/d/1D14yBJkfI1cTPJ0hpfcYH9qKB16wMo4N') no-repeat center center fixed; /* বিকল্প হিসেবে স্কুলের ছবিও দিতে পারেন */
+            background-size: cover;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* ব্যাকগ্রাউন্ড ডার্ক ওভারলে যাতে লেখা ও লোগো স্পষ্টো দেখা যায় */
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(11, 27, 43, 0.85);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            text-align: center;
+        }
+
+        /* স্কুল লোগো অ্যানিমেশন */
+        .school-logo {
+            width: 110px;
+            height: 110px;
+            border-radius: 50%;
+            border: 3px solid #00f0ff;
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.6);
+            object-fit: contain;
+            background: #fff;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 15px rgba(0, 240, 255, 0.5); }
+            50% { transform: scale(1.05); box-shadow: 0 0 25px rgba(0, 240, 255, 0.9); }
+            100% { transform: scale(1); box-shadow: 0 0 15px rgba(0, 240, 255, 0.5); }
+        }
+
+        h1 {
+            color: #ffffff;
+            font-size: 22px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        h3 {
+            color: #ffcc00;
+            font-size: 14px;
+            margin-bottom: 30px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        /* এসপি দিন স্পিনার (Loading Spinner) */
+        .spinner {
+            width: 45px;
+            height: 45px;
+            border: 4px solid rgba(255, 255, 255, 0.2);
+            border-top: 4px solid #00f0ff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: #00f0ff;
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        /* যদি লোড হতে দেরি হয় তবে রিলোড বাটন */
+        .retry-btn {
+            display: none;
+            margin-top: 20px;
+            background-color: #ff3b3b;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(255, 59, 59, 0.5);
+            transition: 0.3s;
+        }
+
+        .retry-btn:hover {
+            background-color: #ff5252;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="splash-container" style="background-image: url('https://lh3.googleusercontent.com/d/1D14yBJkfI1cTPJ0hpfcYH9qKB16wMo4N');">
+        <div class="overlay">
+            <!-- স্কুল লোগো -->
+            <img src="https://lh3.googleusercontent.com/d/1D14yBJkfI1cTPJ0hpfcYH9qKB16wMo4N" alt="School Logo" class="school-logo">
+            
+            <h1>DHAINAGAR HIGH SCHOOL (H.S.)</h1>
+            <h3>Salary Update System</h3>
+
+            <!-- লোডার স্পিনার -->
+            <div id="loaderBox">
+                <div class="spinner"></div>
+                <div class="loading-text" id="statusText">Connecting to Portal...</div>
+            </div>
+
+            <!-- ফলব্যাক রিলোড বাটন -->
+            <button class="retry-btn" id="retryBtn" onclick="checkAndRedirect()">Reload Page</button>
+        </div>
+    </div>
+
+    <script>
+        const targetUrl = "https://script.google.com/macros/s/AKfycbyuaWcLh_OtFt-QXH9jM3BTJAhfDjokOJj4KPtQY3E2yJ1vdG7xDw-6c37AwxowtgDP/exec";
+
+        function checkAndRedirect() {
+            const statusText = document.getElementById("statusText");
+            const spinner = document.querySelector(".spinner");
+            const retryBtn = document.getElementById("retryBtn");
+
+            statusText.innerText = "Opening Portal, Please Wait...";
+            retryBtn.style.display = "none";
+            spinner.style.display = "block";
+
+            // ফেচ রিকোয়েস্টের মাধ্যমে চেক করা লিংকটি রেসপন্স দিচ্ছে কি না
+            // নোটেহ: Google Apps Script CORS প্রটেকশনের কারণে 'no-cors' মোড ব্যবহার করা হয়েছে
+            fetch(targetUrl, { mode: 'no-cors' })
+                .then(() => {
+                    // সফলভাবে লিংক ট্রিগার হলে রিডাইরেক্ট করবে
+                    window.location.replace(targetUrl);
+                })
+                .catch((error) => {
+                    console.log("Connection delayed:", error);
+                    fallbackRedirect();
+                });
+
+            // অতিরিক্ত নিরাপত্তা হিসেবে ৫ সেকেন্ডের টাইমার সেট করা হলো
+            setTimeout(() => {
+                window.location.replace(targetUrl);
+            }, 4000);
+        }
+
+        function fallbackRedirect() {
+            // যদি ফেচ করতে সমস্যা হয় তবুও সরাসরি রিডাইরেক্ট করার চেষ্টা করবে
+            window.location.href = targetUrl;
+        }
+
+        // পেজ লোড হওয়ার সাথে সাথেই ফাংশন কল হবে
+        window.onload = function() {
+            setTimeout(checkAndRedirect, 1000);
+
+            // যদি ৭ সেকেন্ডের বেশি সময় ধরে লোড না হয়, তবে ইউজারের সুবিধার জন্য রিলোড বাটন অন করে দেবে
+            setTimeout(() => {
+                const retryBtn = document.getElementById("retryBtn");
+                const spinner = document.querySelector(".spinner");
+                const statusText = document.getElementById("statusText");
+                if (retryBtn) {
+                    retryBtn.style.display = "block";
+                    spinner.style.display = "none";
+                    statusText.innerText = "Network is slow. Click below to reload:";
+                }
+            }, 7000);
+        };
+    </script>
+</body>
+</html>
