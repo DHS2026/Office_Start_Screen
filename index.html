@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Dhainagar High School (H.S.) - Loading</title>
     <style>
         * {
@@ -16,22 +16,23 @@
             width: 100%;
             height: 100%;
             overflow: hidden;
-            background-color: #1c1c1c; /* অ্যাপের সাথে ম্যাচ করার জন্য ডার্ক ব্যাকগ্রাউন্ড */
+            background-color: #1c1c1c; 
         }
 
-        /* 🟢 IFRAME STYLES 🟢 */
+        /* 🟢 IFRAME STYLES (গুগল ব্যানার লুকানোর ট্রিকসহ) 🟢 */
         #app-iframe {
             position: absolute;
-            top: 0;
+            top: -45px; /* গুগলের ব্যানারটি ফ্রেমের বাইরে উপরে পাঠিয়ে দেওয়া হলো */
             left: 0;
             width: 100%;
-            height: 100%;
+            height: calc(100% + 45px); /* ব্যালেন্স করার জন্য উচ্চতা বাড়ানো হলো */
             border: none;
-            z-index: 1; /* স্টার্ট পেজের ঠিক পেছনে থাকবে */
+            z-index: 1; 
         }
 
+        /* 🟢 SPLASH SCREEN STYLES 🟢 */
         .splash-container {
-            position: fixed; /* absolute এর বদলে fixed করা হলো */
+            position: fixed; 
             top: 0;
             left: 0;
             width: 100%;
@@ -41,11 +42,10 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 9999; /* আইফ্রেমের উপরে থাকবে */
+            z-index: 9999; 
             transition: opacity 0.8s ease-in-out, visibility 0.8s ease-in-out;
         }
 
-        /* ফেড-আউট হওয়ার ক্লাস */
         .splash-container.fade-out {
             opacity: 0;
             visibility: hidden;
@@ -138,15 +138,14 @@
             text-align: center;
             width: 100%;
         }
-
     </style>
 </head>
 <body>
 
-    <!-- 🟢 আপনার মূল অ্যাপটি আইফ্রেমের ভেতরে লোড হবে 🟢 -->
+    <!-- 🟢 মূল অ্যাপ (Iframe) 🟢 -->
     <iframe id="app-iframe" src="https://script.google.com/macros/s/AKfycbznJYPe17WXEG3t2vom4SM-X4NsYHORhaGoGQY_Tkxo4UvDZ9_D-MTVhRDTKisHQUTK/exec"></iframe>
 
-    <!-- 🟢 স্টার্ট পেজ / স্প্ল্যাশ স্ক্রিন 🟢 -->
+    <!-- 🟢 স্প্ল্যাশ স্ক্রিন 🟢 -->
     <div class="splash-container" id="splashScreen">
         <div class="overlay">
             <img src="school_logo_preview.png" alt="School Logo" class="school-logo">
@@ -165,28 +164,47 @@
         const iframe = document.getElementById('app-iframe');
         const splashScreen = document.getElementById('splashScreen');
         const statusText = document.getElementById('statusText');
+        
+        let isAppLoaded = false;
 
-        // আইফ্রেমটি সম্পূর্ণ লোড হয়ে যাওয়ার পর এই ফাংশনটি কাজ করবে
-        iframe.onload = function() {
+        // স্প্ল্যাশ স্ক্রিন সরানোর মূল ফাংশন
+        function removeSplashScreen() {
+            if (isAppLoaded) return; // একবার সরে গেলে আর কাজ করবে না
+            isAppLoaded = true;
+            
             statusText.innerText = "Portal Loaded Successfully!";
             
-            // হাফ সেকেন্ড পর স্টার্ট পেজটি ফেড-আউট হয়ে অ্যাপটি সামনে চলে আসবে
             setTimeout(() => {
                 splashScreen.classList.add('fade-out');
-            }, 500);
+            }, 300);
 
-            // অ্যানিমেশন শেষ হওয়ার পর DOM থেকে সরিয়ে দেওয়া
             setTimeout(() => {
                 splashScreen.style.display = 'none';
-            }, 1300);
+            }, 1100);
+        }
+
+        // পদ্ধতি ১: আইফ্রেম নিজে থেকে লোড হলে (গুগলের রিডাইরেক্টের কারণে এটি একটু দেরিতে হতে পারে)
+        iframe.onload = function() {
+            // আইফ্রেম লোড হওয়ার পর কন্টেন্ট রেন্ডার হওয়ার জন্য আরও ১ সেকেন্ড সময় দেওয়া হলো
+            setTimeout(removeSplashScreen, 1000);
         };
 
-        // যদি নেটওয়ার্ক খুব স্লো থাকে তবে ইউজারের বোঝার জন্য টেক্সট পাল্টে দেওয়া
+        // পদ্ধতি ২ (ফেলসেফ): যদি স্লো নেটওয়ার্ক থাকে
         setTimeout(() => {
-            if (!splashScreen.classList.contains('fade-out')) {
+            if (!isAppLoaded) {
                 statusText.innerText = "Network is slow, still loading...";
             }
-        }, 8000);
+        }, 5000);
+
+        // পদ্ধতি ৩ (ব্রুটফোর্স/ফেলসেফ): যদি আইফ্রেম কোনো কারণে onload সিগন্যাল দিতে ব্যর্থ হয় (অ্যাপে প্রায়ই হয়)
+        // ১২ সেকেন্ড পর জোর করে স্প্ল্যাশ স্ক্রিন সরিয়ে দেওয়া হবে, যাতে ইউজার আটকে না থাকে।
+        setTimeout(() => {
+            if (!isAppLoaded) {
+                statusText.innerText = "Forcing entry...";
+                removeSplashScreen();
+            }
+        }, 12000);
+
     </script>
 </body>
 </html>
