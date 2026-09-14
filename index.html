@@ -19,15 +19,24 @@
             background-color: #1c1c1c; 
         }
 
-        /* 🟢 IFRAME STYLES (গুগল ব্যানার লুকানোর ট্রিকসহ) 🟢 */
-        #app-iframe {
+        /* 🟢 WRAPPER TRICK: APK-তে ব্যানার পার্মানেন্টলি হাইড করার জন্য 🟢 */
+        .iframe-wrapper {
             position: absolute;
-            top: -45px; /* গুগলের ব্যানারটি ফ্রেমের বাইরে উপরে পাঠিয়ে দেওয়া হলো */
+            top: 0;
             left: 0;
             width: 100%;
-            height: calc(100% + 45px); /* ব্যালেন্স করার জন্য উচ্চতা বাড়ানো হলো */
+            height: 100%;
+            overflow: hidden; /* ফ্রেমের বাইরের অংশ কেটে ফেলবে */
+            z-index: 1;
+        }
+
+        #app-iframe {
+            position: absolute;
+            top: -45px; 
+            left: 0;
+            width: 100%;
+            height: calc(100% + 45px); 
             border: none;
-            z-index: 1; 
         }
 
         /* 🟢 SPLASH SCREEN STYLES 🟢 */
@@ -36,13 +45,12 @@
             top: 0;
             left: 0;
             width: 100%;
-            height: 100vh;
-            background: url('school_logo_preview.png') no-repeat center center fixed;
-            background-size: cover;
+            height: 100%; /* 100vh এর বদলে 100% ব্যবহার করা হলো APK-এর জন্য */
             display: flex;
             justify-content: center;
             align-items: center;
             z-index: 9999; 
+            background-color: #0b1b2b; /* ব্যাকআপ কালার */
             transition: opacity 0.8s ease-in-out, visibility 0.8s ease-in-out;
         }
 
@@ -57,14 +65,13 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(11, 27, 43, 0.88);
+            background: rgba(11, 27, 43, 0.95);
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             padding: 20px;
             text-align: center;
-            box-sizing: border-box;
         }
 
         .school-logo {
@@ -142,13 +149,17 @@
 </head>
 <body>
 
-    <!-- 🟢 মূল অ্যাপ (Iframe) 🟢 -->
-    <iframe id="app-iframe" src="https://script.google.com/macros/s/AKfycbznJYPe17WXEG3t2vom4SM-X4NsYHORhaGoGQY_Tkxo4UvDZ9_D-MTVhRDTKisHQUTK/exec"></iframe>
+    <!-- 🟢 Iframe Wrapper (APK ব্যানার ট্রিক) 🟢 -->
+    <div class="iframe-wrapper">
+        <!-- শুরুতে src খালি থাকবে, জাভাস্ক্রিপ্ট দিয়ে পরে বসানো হবে -->
+        <iframe id="app-iframe" src=""></iframe>
+    </div>
 
     <!-- 🟢 স্প্ল্যাশ স্ক্রিন 🟢 -->
     <div class="splash-container" id="splashScreen">
+        <!-- APK তে ছবি না পাওয়ার সমস্যা এড়াতে ডিরেক্ট গুগল ড্রাইভের লোগো লিংক ব্যবহার করা হলো -->
         <div class="overlay">
-            <img src="school_logo_preview.png" alt="School Logo" class="school-logo">
+            <img src="https://lh3.googleusercontent.com/d/1D14yBJkfI1cTPJ0hpfcYH9qKB16wMo4N" alt="School Logo" class="school-logo">
             
             <h1>DHAINAGAR HIGH SCHOOL (H.S.)</h1>
             <h3>Salary Update System</h3>
@@ -165,11 +176,13 @@
         const splashScreen = document.getElementById('splashScreen');
         const statusText = document.getElementById('statusText');
         
+        // আপনার Google Apps Script এর লিংক
+        const appsScriptUrl = "https://script.google.com/macros/s/AKfycbznJYPe17WXEG3t2vom4SM-X4NsYHORhaGoGQY_Tkxo4UvDZ9_D-MTVhRDTKisHQUTK/exec";
+        
         let isAppLoaded = false;
 
-        // স্প্ল্যাশ স্ক্রিন সরানোর মূল ফাংশন
         function removeSplashScreen() {
-            if (isAppLoaded) return; // একবার সরে গেলে আর কাজ করবে না
+            if (isAppLoaded) return; 
             isAppLoaded = true;
             
             statusText.innerText = "Portal Loaded Successfully!";
@@ -183,21 +196,30 @@
             }, 1100);
         }
 
-        // পদ্ধতি ১: আইফ্রেম নিজে থেকে লোড হলে (গুগলের রিডাইরেক্টের কারণে এটি একটু দেরিতে হতে পারে)
-        iframe.onload = function() {
-            // আইফ্রেম লোড হওয়ার পর কন্টেন্ট রেন্ডার হওয়ার জন্য আরও ১ সেকেন্ড সময় দেওয়া হলো
-            setTimeout(removeSplashScreen, 1000);
+        // পেজ লোড হওয়ার পর (Delay Iframe Load)
+        // এতে APK স্প্ল্যাশ স্ক্রিনটিকে ব্ল্যাঙ্ক না করে সাথে সাথে স্ক্রিনে দেখাবে
+        window.onload = () => {
+            setTimeout(() => {
+                iframe.src = appsScriptUrl; // হাফ সেকেন্ড পর আইফ্রেম লোড শুরু হবে
+            }, 500);
         };
 
-        // পদ্ধতি ২ (ফেলসেফ): যদি স্লো নেটওয়ার্ক থাকে
+        // আইফ্রেম নিজে থেকে লোড কমপ্লিট হলে
+        iframe.onload = function() {
+            // যদি src খালি না থাকে (মানে গুগল স্ক্রিপ্ট লোড হয়েছে)
+            if(iframe.src !== "" && iframe.src !== window.location.href) {
+                setTimeout(removeSplashScreen, 1000);
+            }
+        };
+
+        // ফেলসেফ: নেটওয়ার্ক স্লো থাকলে
         setTimeout(() => {
             if (!isAppLoaded) {
                 statusText.innerText = "Network is slow, still loading...";
             }
         }, 5000);
 
-        // পদ্ধতি ৩ (ব্রুটফোর্স/ফেলসেফ): যদি আইফ্রেম কোনো কারণে onload সিগন্যাল দিতে ব্যর্থ হয় (অ্যাপে প্রায়ই হয়)
-        // ১২ সেকেন্ড পর জোর করে স্প্ল্যাশ স্ক্রিন সরিয়ে দেওয়া হবে, যাতে ইউজার আটকে না থাকে।
+        // ফেলসেফ: ১২ সেকেন্ড পর জোর করে স্প্ল্যাশ স্ক্রিন সরিয়ে দেওয়া
         setTimeout(() => {
             if (!isAppLoaded) {
                 statusText.innerText = "Forcing entry...";
