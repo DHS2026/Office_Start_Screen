@@ -26,7 +26,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            overflow: hidden; /* ফ্রেমের বাইরের অংশ কেটে ফেলবে */
+            overflow: hidden;
             z-index: 1;
         }
 
@@ -45,12 +45,12 @@
             top: 0;
             left: 0;
             width: 100%;
-            height: 100%; /* 100vh এর বদলে 100% ব্যবহার করা হলো APK-এর জন্য */
+            height: 100%; 
             display: flex;
             justify-content: center;
             align-items: center;
             z-index: 9999; 
-            background-color: #0b1b2b; /* ব্যাকআপ কালার */
+            background-color: #0b1b2b; 
             transition: opacity 0.8s ease-in-out, visibility 0.8s ease-in-out;
         }
 
@@ -151,15 +151,14 @@
 
     <!-- 🟢 Iframe Wrapper (APK ব্যানার ট্রিক) 🟢 -->
     <div class="iframe-wrapper">
-        <!-- শুরুতে src খালি থাকবে, জাভাস্ক্রিপ্ট দিয়ে পরে বসানো হবে -->
         <iframe id="app-iframe" src=""></iframe>
     </div>
 
     <!-- 🟢 স্প্ল্যাশ স্ক্রিন 🟢 -->
     <div class="splash-container" id="splashScreen">
-        <!-- APK তে ছবি না পাওয়ার সমস্যা এড়াতে ডিরেক্ট গুগল ড্রাইভের লোগো লিংক ব্যবহার করা হলো -->
         <div class="overlay">
-            <img src="https://lh3.googleusercontent.com/d/1D14yBJkfI1cTPJ0hpfcYH9qKB16wMo4N" alt="School Logo" class="school-logo">
+            <!-- 🟢 লোগোর সোর্স পরিবর্তন করে গিটহাবের লোকাল ফাইলের নাম দেওয়া হলো 🟢 -->
+            <img src="school_logo_preview.png" alt="School Logo" class="school-logo">
             
             <h1>DHAINAGAR HIGH SCHOOL (H.S.)</h1>
             <h3>Salary Update System</h3>
@@ -196,30 +195,24 @@
             }, 1100);
         }
 
-        // পেজ লোড হওয়ার পর (Delay Iframe Load)
-        // এতে APK স্প্ল্যাশ স্ক্রিনটিকে ব্ল্যাঙ্ক না করে সাথে সাথে স্ক্রিনে দেখাবে
         window.onload = () => {
             setTimeout(() => {
-                iframe.src = appsScriptUrl; // হাফ সেকেন্ড পর আইফ্রেম লোড শুরু হবে
+                iframe.src = appsScriptUrl; 
             }, 500);
         };
 
-        // আইফ্রেম নিজে থেকে লোড কমপ্লিট হলে
         iframe.onload = function() {
-            // যদি src খালি না থাকে (মানে গুগল স্ক্রিপ্ট লোড হয়েছে)
             if(iframe.src !== "" && iframe.src !== window.location.href) {
                 setTimeout(removeSplashScreen, 1000);
             }
         };
 
-        // ফেলসেফ: নেটওয়ার্ক স্লো থাকলে
         setTimeout(() => {
             if (!isAppLoaded) {
                 statusText.innerText = "Network is slow, still loading...";
             }
         }, 5000);
 
-        // ফেলসেফ: ১২ সেকেন্ড পর জোর করে স্প্ল্যাশ স্ক্রিন সরিয়ে দেওয়া
         setTimeout(() => {
             if (!isAppLoaded) {
                 statusText.innerText = "Forcing entry...";
